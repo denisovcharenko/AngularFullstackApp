@@ -11,6 +11,7 @@ export class AuthController {
     public register(req: RequestPost<{ fullName: string, email: string, password: string }>, res: Response) {
         var hashedPassword = bcryptjs.hashSync(req.body.password, 8);
 
+		
         UserRepository.create({
             fullName: req.body.fullName,
             email: req.body.email,
@@ -24,12 +25,15 @@ export class AuthController {
                     expiresIn: 86400 // expires in 24 hours
                 });
                 res.status(200).send({ auth: true, token: token, user: user });
-            });
+			});
+			
+			
     }
 
-    public login(req: RequestPost<{ login: string, password: string }>, res: Response) {
-        UserRepository.findOne({ email: req.body.login }, (err, user) => {
-            if (err) return res.status(500).send('Error on the server.');
+    public login(req: RequestPost<{ email: string, password: string }>, res: Response) {
+        UserRepository.findOne({ email: req.body.email }, (err, user) => {
+			if (err) return res.status(500).send('Error on the server.');
+			console.log(req.body)
             if (!user) return res.status(400).send('No user found.');
             var passwordIsValid = bcryptjs.compareSync(req.body.password, user.password);
             if (!passwordIsValid) return res.status(401).send({ auth: false, token: null });
